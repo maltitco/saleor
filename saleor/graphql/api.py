@@ -3,6 +3,9 @@ import graphql_jwt
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_jwt.decorators import permission_required
 
+from .menu.mutations import MenuCreate
+from .menu.resolvers import resolve_menus, resolve_menu_items
+from .menu.types import Menu, MenuItem
 from .account.resolvers import resolve_user, resolve_users
 from .account.types import User
 from .descriptions import DESCRIPTIONS
@@ -59,6 +62,16 @@ class Query(graphene.ObjectType):
         Collection, query=graphene.String(
             description=DESCRIPTIONS['collection']),
         description='List of the shop\'s collections.')
+    menu = graphene.Field(
+        Menu, id=graphene.Argument(graphene.ID),
+        description='Lookup a menu by ID.')
+    menus = DjangoFilterConnectionField(
+        Menu, description="List of the shop\'s menus.")
+    menu_item = graphene.Field(
+        MenuItem, id=graphene.Argument(graphene.ID),
+        description='Lookup a menu item by ID.')
+    menu_items = DjangoFilterConnectionField(
+        MenuItem, description='List of the shop\'s menu items.')
     order = graphene.Field(
         Order, description='Lookup an order by ID.',
         id=graphene.Argument(graphene.ID))
@@ -130,6 +143,18 @@ class Query(graphene.ObjectType):
     def resolve_collections(self, info, query=None, **kwargs):
         resolve_collections(info, query)
 
+    def resolve_menu(self, info, id):
+        return get_node(info, id, only_type=Menu)
+
+    def get_menus(self, info, **kwargs):
+        return resolve_menus(info)
+
+    def resolve_menu_item(self, info, id):
+        return get_node(info, id, only_type=MenuItem)
+
+    def get_menu_items(self, info, **kwargs):
+        return resolve_menu_items(info)
+
     def resolve_page(self, info, id=None, slug=None):
         if slug is not None:
             return page_models.Page.objects.get(slug=slug)
@@ -199,6 +224,8 @@ class Mutations(graphene.ObjectType):
     collection_delete = CollectionDelete.Field()
     collection_add_products = CollectionAddProducts.Field()
     collection_remove_products = CollectionRemoveProducts.Field()
+
+    menu_create = MenuCreate.Field()
 
     page_create = PageCreate.Field()
     page_delete = PageDelete.Field()
