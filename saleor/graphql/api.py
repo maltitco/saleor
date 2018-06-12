@@ -3,9 +3,12 @@ import graphql_jwt
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_jwt.decorators import permission_required
 
-from .menu.mutations import MenuCreate
 from .menu.resolvers import resolve_menus, resolve_menu_items
 from .menu.types import Menu, MenuItem
+# FIXME: sorting import by putting below line at the beginning breaks app
+from .menu.mutations import (
+    MenuCreate, MenuDelete, MenuUpdate, MenuItemCreate, MenuItemDelete,
+    MenuItemUpdate)
 from .account.resolvers import resolve_user, resolve_users
 from .account.types import User
 from .descriptions import DESCRIPTIONS
@@ -226,6 +229,12 @@ class Mutations(graphene.ObjectType):
     collection_remove_products = CollectionRemoveProducts.Field()
 
     menu_create = MenuCreate.Field()
+    menu_delete = MenuDelete.Field()
+    menu_update = MenuUpdate.Field()
+
+    menu_item_create = MenuItemCreate.Field()
+    menu_item_delete = MenuItemDelete.Field()
+    menu_item_update = MenuItemUpdate.Field()
 
     page_create = PageCreate.Field()
     page_delete = PageDelete.Field()
